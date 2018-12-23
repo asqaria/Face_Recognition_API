@@ -7,6 +7,7 @@ import cv2
 import openface
 from PIL import Image
 import numpy as np
+import os
 
 engine = create_engine("sqlite:///database.db")
 Base.metadata.bind = engine
@@ -23,6 +24,13 @@ predictor_model = "face_landmark.dat"
 face_detector = dlib.get_frontal_face_detector()
 face_aligner = openface.AlignDlib(predictor_model)
 
+# Allowed extensions for images
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 @app.route('/create', methods=['POST'])
 def create():
@@ -30,7 +38,18 @@ def create():
         name = request.form['name']
         email = request.form['email']
         phone = request.form['phone']
+        picture = request.files.get('picture')
         images = request.files.getlist('images')
+
+        if picture and allowed_file(picture.filename):
+            extension = picture.filename.split('.')[1]
+            user = Users(name=name, email=email, phone=phone, image=extension)
+            session.add(user)
+            session.commit()
+            filename = '%s.%s' % (user.id, extension)
+            picture.save(os.path.join('images/users', filename))
+        else:
+            return 'Error while uploading picture'
 
         for i in images:
             # Run the HOG face detector for all images.
