@@ -24,7 +24,7 @@ face_detector = dlib.get_frontal_face_detector()
 face_aligner = openface.AlignDlib(predictor_model)
 
 # Allowed extensions for images
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
+ALLOWED_EXTENSIONS = set(['png', 'jpg'])
 # Minimum amount of images
 MIN_IMG = 2
 
