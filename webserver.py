@@ -26,6 +26,9 @@ face_aligner = openface.AlignDlib(predictor_model)
 # Allowed extensions for images
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
+# model='nn4.small2.def.lua'
+net = openface.TorchNeuralNet(model='nn4.small2.v1.t7', imgDim=96, cuda=False)
+
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -56,11 +59,14 @@ def create():
         detected_faces = face_detector(image, 1)
 
         aligned_faces = list()
-
+        i=1
         # Crop and align all faces
         for j, face_rect in enumerate(detected_faces):
-            aligned_face = face_aligner.align(534, image, face_rect, landmarkIndices=openface.AlignDlib.OUTER_EYES_AND_NOSE)
+            aligned_face = face_aligner.align(96, image, face_rect, landmarkIndices=openface.AlignDlib.OUTER_EYES_AND_NOSE)
             aligned_faces.append(aligned_face)
+            a = net.forward(aligned_face)
+            print(i)
+            i+=1
 
     return jsonify(Users=[user.serialize])
 
