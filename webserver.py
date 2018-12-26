@@ -2,17 +2,18 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from create_db import Base, Users, Visitors, Suspicious
-from testing import train
+from sklearn.preprocessing import LabelEncoder
+from sklearn.svm import SVC
 import dlib
 import cv2
 import openface
 from PIL import Image
 import numpy as np
-import os
 import csv
 import pickle
 import sys
-import json
+import os
+import pandas as pd
 
 engine = create_engine("sqlite:///database.db")
 Base.metadata.bind = engine
@@ -30,9 +31,14 @@ face_aligner = openface.AlignDlib(predictor_model)
 
 # Allowed extensions for images
 ALLOWED_EXTENSIONS = set(['png', 'jpg'])
+
 # Minimum amount of images
 MIN_IMG = 2
 
+# Minimum confidence
+TRESHOLD = 0.85
+
+# Deep network installation
 modeldir = 'features/nn4.small2.v1.t7'
 net = openface.TorchNeuralNet(model=modeldir, imgDim=96, cuda=False)
 
@@ -58,6 +64,36 @@ def get_rep(images):
                                               landmarkIndices=openface.AlignDlib.OUTER_EYES_AND_NOSE)
             matrices.append(net.forward(aligned_face))
     return total_faces, matrices
+
+
+def train(dir='images/users', workdir='features'):
+    labels = list()
+    merged_csv_path = os.path.join(workdir, 'merged.csv')
+    merged = open(merged_csv_path, "w+")
+
+    for filename in sorted(os.listdir(dir)):
+        new_dir = os.path.join(dir, filename)
+        for csv in sorted(os.listdir(new_dir)):
+            if csv.endswith('.csv'):
+                labels.append(filename)
+                fullpath = os.path.join(dir, filename, csv)
+                fl = open(fullpath)
+                for line in fl:
+                    merged.write(line)
+                fl.close()
+    merged.close()
+
+    le = LabelEncoder().fit(labels)
+    labelsNum = le.transform(labels)
+    embeddings = pd.read_csv(merged_csv_path, header=None).as_matrix()
+
+    clf = SVC(C=1, kernel='linear', probability=True)
+    clf.fit(embeddings, labelsNum)
+
+    fName = "{}/classifier.pkl".format(workdir)
+    print("Saving classifier to '{}'".format(fName))
+    with open(fName, 'w') as f:
+        pickle.dump((le, clf), f)
 
 
 @app.route('/recognize', methods=['POST'])
@@ -86,7 +122,7 @@ def recognize():
         names.append(user.name)
         confidences.append(predictions[maxI])
 
-    if(len(confidences) > 0 and max(confidences) > 0.85):
+    if(len(confidences) > 0 and max(confidences) > TRESHOLD):
         best_idx = confidences.index(max(confidences))
         return jsonify({
             'id': labels[best_idx],
@@ -148,7 +184,6 @@ def create():
 
     # update classifier.pkl
     train()
-
     return jsonify(result)
 
 
