@@ -1,0 +1,64 @@
+<div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form name='reg_form' enctype="multipart/form-data" method="POST" action="/insert/">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Registration</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input style='margin-bottom: 10px;' name='name' type="text" class="form-control" placeholder="Full name" required>
+        <input style='margin-bottom: 10px;' name='email' type="email" class="form-control" placeholder="Email" required>
+        <input style='margin-bottom: 10px;' name='phone' type="phone" class="form-control" placeholder="Phone number" required>
+        <div style='margin-bottom: 10px;' class="custom-file">
+          <input name="images" type="file" class="custom-file-input" id="customFile" required multiple>
+          <label class="custom-file-label" for="customFile">Choose images for trining (minimum 30)</label>
+        </div>
+
+        <img style="max-width: 100%" src="http://placehold.it/400x300" id="cropper">
+        <div style='margin: 10px 0 10px 0;' class="custom-file">
+          <input onchange="previewFile()" name="picture" type="file" class="custom-file-input" id="customFile" required multiple>
+          <label class="custom-file-label" for="customFile">Choose profile picture</label>
+        </div>
+        <input name='x' type='hidden'>
+        <input name='y' type='hidden'>
+        <input name='w' type='hidden'>
+        <input name='h' type='hidden'>
+        <script>
+            var croppr = new Croppr('#cropper', {
+                aspectRatio: 0.75,
+                onCropEnd: (data) => {
+                  console.log('end', data);
+                  document.reg_form.x.value = data.x;
+                  document.reg_form.y.value = data.y;
+                  document.reg_form.w.value = data.width;
+                  document.reg_form.h.value = data.height;
+                }
+            });
+
+            function previewFile() {
+              var preview = document.querySelector('.modal-body img');
+              var file    = document.querySelector('input[name=picture]').files[0];
+              var reader  = new FileReader();
+
+              reader.onloadend = function () {
+                preview.src = reader.result;
+                croppr.imageClippedEl.src=reader.result;
+              }
+
+              if (file) {
+                reader.readAsDataURL(file);
+              }
+            }
+        </script>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </form>
+    </div>
+  </div>
+</div>

@@ -66,7 +66,7 @@ def get_rep(images):
     return total_faces, matrices
 
 
-def train(dir='images/users', workdir='features'):
+def train(dir, workdir):
     labels = list()
     merged_csv_path = os.path.join(workdir, 'merged.csv')
     merged = open(merged_csv_path, "w+")
@@ -84,15 +84,15 @@ def train(dir='images/users', workdir='features'):
     merged.close()
 
     le = LabelEncoder().fit(labels)
-    labelsNum = le.transform(labels)
+    labels_num = le.transform(labels)
     embeddings = pd.read_csv(merged_csv_path, header=None).as_matrix()
 
     clf = SVC(C=1, kernel='linear', probability=True)
-    clf.fit(embeddings, labelsNum)
+    clf.fit(embeddings, labels_num)
 
-    fName = "{}/classifier.pkl".format(workdir)
-    print("Saving classifier to '{}'".format(fName))
-    with open(fName, 'w') as f:
+    fname = "{}/classifier.pkl".format(workdir)
+    print("Saving classifier to '{}'".format(fname))
+    with open(fname, 'w') as f:
         pickle.dump((le, clf), f)
 
 
@@ -137,57 +137,54 @@ def recognize():
         })
 
 
-@app.route('/create/', methods=['POST, GET'])
-def create():
-    if request.method == 'POST':
-        name = request.form['name']
-        email = request.form['email']
-        phone = request.form['phone']
-        picture = request.files.get('picture')
-        images = request.files.getlist('images')
+@app.route('/insert/', methods=['POST'])
+def insert():
+    name = request.form['name']
+    email = request.form['email']
+    phone = request.form['phone']
+    picture = request.files.get('picture')
+    images = request.files.getlist('images')
 
-        if name == '' or email == '' or phone == '' or len(images) < MIN_IMG or not picture:
-            return 'You are required to fill up all forms!'
+    if name == '' or email == '' or phone == '' or len(images) < MIN_IMG or not picture:
+        return 'You are required to fill up all forms!'
 
-        total_images = len(images)
-        total_faces, matrices = get_rep(images)
+    total_images = len(images)
+    total_faces, matrices = get_rep(images)
 
-        if total_faces < MIN_IMG or total_images < MIN_IMG:
-            return 'Required minimum %d face images per user' % MIN_IMG
+    if total_faces < MIN_IMG or total_images < MIN_IMG:
+        return 'Required minimum %d face images per user' % MIN_IMG
 
-        if picture and allowed_file(picture.filename):
-            extension = picture.filename.split('.')[1]
-            user = Users(name=name, email=email, phone=phone, image=extension)
-            session.add(user)
-            session.commit()
-            filename = 'picture.%s' % extension
-            path = 'images/users/%s' % user.id
-            os.mkdir(path)
-            picture.save(os.path.join(path, filename))
+    if picture and allowed_file(picture.filename):
+        extension = picture.filename.split('.')[1]
+        user = Users(name=name, email=email, phone=phone, image=extension)
+        session.add(user)
+        session.commit()
+        filename = 'picture.%s' % extension
+        path = 'images/users/%s' % user.id
+        os.mkdir(path)
+        picture.save(os.path.join(path, filename))
 
-            # create matrix for each face
-            index = 0
-            for matrix in matrices:
-                filename = '%s.csv' % index
-                path = os.path.join('images/users/%s' % user.id, filename)
-                with open(path, 'w+') as csvfile:
-                    spamwriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                    spamwriter.writerow(matrix)
-                index += 1
-        else:
-            return 'Error while uploading picture'
+        # create matrix for each face
+        index = 0
+        for matrix in matrices:
+            filename = '%s.csv' % index
+            path = os.path.join('images/users/%s' % user.id, filename)
+            with open(path, 'w+') as csvfile:
+                spamwriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                spamwriter.writerow(matrix)
+            index += 1
+    else:
+        return 'Error while uploading picture'
 
-        result = {
-            'id': user.id,
-            'images': total_images,
-            'detected_faces': total_faces
-        }
+    result = {
+        'id': user.id,
+        'images': total_images,
+        'detected_faces': total_faces
+    }
 
-        # update classifier.pkl
-        train()
-        return jsonify(result)
-    elif request.method == 'GET':
-        return render_template('register.html')
+    # update classifier.pkl
+    train(dir='images/users', workdir='features')
+    return jsonify(result)
 
 
 @app.route('/update/', methods=['POST'])
@@ -202,7 +199,7 @@ def delete():
 
 @app.route('/', methods=['GET'])
 def main():
-    pass
+    return render_template('index.html')
 
 
 @app.route('/visitors/', methods=['GET'])
@@ -210,8 +207,8 @@ def visitors():
     pass
 
 
-@app.route('/suspicious/', methods=['GET'])
-def suspicious():
+@app.route('/users/', methods=['GET'])
+def users():
     pass
 
 
@@ -220,8 +217,8 @@ def user_id(id):
     pass
 
 
-@app.route('/suspicious/<int:id>', methods=['GET'])
-def suspicious_id(id):
+@app.route('/suspicious/', methods=['GET'])
+def suspicious():
     pass
 
 
