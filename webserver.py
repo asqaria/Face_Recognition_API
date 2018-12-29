@@ -136,6 +136,13 @@ def recognize():
             'confidence': confidences[best_idx]
         })
     else:
+        pic = Image.open(images[0].stream)
+        extension = images[0].filename.split('.')[1]
+        suspicious = Suspicious(image=extension)
+        session.add(suspicious)
+        session.commit()
+        path = 'static/images/suspicious/%s.%s' % (suspicious.id, extension)
+        pic.save(path)
         return jsonify({
             'id': 'Null',
             'name': 'Null',
@@ -216,18 +223,20 @@ def delete():
 
 @app.route('/', methods=['GET'])
 def main():
-    return render_template('index.html')
+    suspicious = session.query(Suspicious).order_by(Suspicious.time.desc()).all()
+    visitors = session.query(Visitors).order_by(Visitors.time.desc()).all()
+    return render_template('index.html', suspicious=suspicious, visitors=visitors)
 
 
 @app.route('/visitors/', methods=['GET'])
 def visitors():
-    visitors = session.query(Visitors).all()
+    visitors = session.query(Visitors).order_by(Visitors.time.desc()).all()
     return render_template('visitors.html', visitors=visitors)
 
 
 @app.route('/users/', methods=['GET'])
 def users():
-    users = session.query(Users).all()
+    users = session.query(Users).order_by(Users.id.desc()).all()
     return render_template('users.html', users=users)
 
 
@@ -238,7 +247,8 @@ def user_id(id):
 
 @app.route('/suspicious/', methods=['GET'])
 def suspicious():
-    return render_template('suspicious.html')
+    suspicious = session.query(Suspicious).order_by(Suspicious.time.desc()).all()
+    return render_template('suspicious.html', suspicious=suspicious)
 
 
 if __name__ == "__main__":
