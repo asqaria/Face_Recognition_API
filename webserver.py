@@ -240,9 +240,11 @@ def users():
     return render_template('users.html', users=users)
 
 
-@app.route('/user/<int:id>/', methods=['GET'])
-def user_id(id):
-    pass
+@app.route('/search', methods=['GET'])
+def search():
+    name = request.args.get('sr')
+    users = session.query(Users).filter(Users.name.like('%'+name+'%')).all()
+    return render_template('users.html', users=users)
 
 
 @app.route('/suspicious/', methods=['GET'])
