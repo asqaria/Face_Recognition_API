@@ -14,6 +14,7 @@ import pickle
 import sys
 import os
 import pandas as pd
+import time as tm
 
 engine = create_engine("sqlite:///database.db")
 Base.metadata.bind = engine
@@ -124,6 +125,11 @@ def recognize():
 
     if len(confidences) > 0 and max(confidences) > TRESHOLD:
         best_idx = confidences.index(max(confidences))
+
+        user = session.query(Users).filter_by(id=labels[best_idx]).one()
+        visitor = Visitors(user_id=user.id, user=user)
+        session.add(visitor)
+        session.commit()
         return jsonify({
             'id': labels[best_idx],
             'name': names[best_idx],
@@ -160,15 +166,26 @@ def insert():
         session.add(user)
         session.commit()
         filename = 'picture.%s' % extension
-        path = 'images/users/%s' % user.id
+        path = 'static/images/users/%s' % user.id
+        pic_path = os.path.join(path, filename)
         os.mkdir(path)
-        picture.save(os.path.join(path, filename))
+        picture.save(pic_path)
+
+        # Crop image
+        x = float(request.form['x'])
+        y = float(request.form['y'])
+        w = float(request.form['w'])
+        h = float(request.form['h'])
+        coords = (x, y, x+w, y+h)
+        image_obj = Image.open(pic_path)
+        cropped_image = image_obj.crop(coords)
+        cropped_image.save(pic_path)
 
         # create matrix for each face
         index = 0
         for matrix in matrices:
             filename = '%s.csv' % index
-            path = os.path.join('images/users/%s' % user.id, filename)
+            path = os.path.join('static/images/users/%s' % user.id, filename)
             with open(path, 'w+') as csvfile:
                 spamwriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
                 spamwriter.writerow(matrix)
@@ -183,7 +200,7 @@ def insert():
     }
 
     # update classifier.pkl
-    train(dir='images/users', workdir='features')
+    train(dir='static/images/users', workdir='features')
     return jsonify(result)
 
 
@@ -204,12 +221,14 @@ def main():
 
 @app.route('/visitors/', methods=['GET'])
 def visitors():
-    pass
+    visitors = session.query(Visitors).all()
+    return render_template('visitors.html', visitors=visitors)
 
 
 @app.route('/users/', methods=['GET'])
 def users():
-    pass
+    users = session.query(Users).all()
+    return render_template('users.html', users=users)
 
 
 @app.route('/user/<int:id>/', methods=['GET'])
@@ -219,7 +238,7 @@ def user_id(id):
 
 @app.route('/suspicious/', methods=['GET'])
 def suspicious():
-    pass
+    return render_template('suspicious.html')
 
 
 if __name__ == "__main__":
