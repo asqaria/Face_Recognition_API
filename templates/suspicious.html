@@ -27,33 +27,27 @@
   }
   </style>
 
-
     <!-- Navigation -->
     {% include 'navigation.html' %}
 
     <!-- Page Content -->
     <div class="container">
-
       <h1 class="my-4 text-center text-lg-left"></h1>
-
       <div class="row text-center text-lg-left">
-        {% for visitor in visitors: %}
+        {% for susp in suspicious: %}
         <div class="col-lg-3 col-md-4 col-xs-6">
-            <img style='width: 100%; border: 1px solid black;' class="img-fluid img-thumbnail" src="{{url_for('static', filename='images/users/'+visitor.user.id|string+'/picture.'+visitor.user.image)}}" alt="">
-            <div class="bottom-left"><small>{{ visitor.user.name }}, <time class="timeago" datetime="{{visitor.time}}">5 months ago</time></small></div>
+            <img style='width: 100%; border: 1px solid black;' class="img-fluid img-thumbnail" src="{{url_for('static', filename='images/suspicious/'+susp.id|string+'.'+susp.image)}}" alt="">
+            <div class="bottom-left"><small><time class="timeago" datetime="{{susp.time}}">5 months ago</time></small></div>
         </div>
         {% endfor %}
       </div>
-
     </div>
     <!-- /.container -->
 
     <!-- Modal -->
     {% include 'registration.html' %}
-
     <!-- Footer -->
     {% include 'footer.html' %}
-
     <!-- Bootstrap core JavaScript -->
     <script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>

@@ -18,15 +18,19 @@
   <body>
   <style>
   .bottom-left {
-    position: absolute;
-    bottom: 30px;
-    left: 20px;
+    position: relative;
+    bottom: 31px;
     border-top: 1px solid grey;
     background-color: #CCC;
-    width: 245px;
-    padding: 5px;
+    width: 100%;
+    padding: 3px 10px 3px 10px;
     opacity: 0.8;
   }
+
+  table td{
+    padding: 10px;
+  }
+
   </style>
 
 
@@ -35,75 +39,34 @@
 
     <!-- Page Content -->
     <div class="container">
-
-      <h1 class="my-4 text-center text-lg-left"></h1>
-
       <div class="row text-center text-lg-left">
-
-        <div class="col-lg-3 col-md-4 col-xs-6">
-          <a href="#" class="d-block mb-4 h-100">
-            <img class="img-fluid img-thumbnail" src="http://placehold.it/400x300" alt="">
-          </a>
-          <div class="bottom-left"><small>Alisher Jandosov</small></div>
+        <div class="col-lg-9 col-md-9 col-xs-6">
+          <div class="container">
+            <h3 class="my-4 text-center text-lg-left">Visitors:</h3>
+            <div class="row" >
+              {% for visitor in visitors: %}
+              <div class="col-lg-4 col-md-4 col-xs-6">
+                  <img style='width: 100%; border: 1px solid black;' class="img-fluid img-thumbnail" src="{{url_for('static', filename='images/users/'+visitor.user.id|string+'/picture.'+visitor.user.image)}}" alt="">
+                  <div class="bottom-left"><small>{{ visitor.user.name }}, <time class="timeago" datetime="{{visitor.time}}">5 months ago</time></small></div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
         </div>
-        <div class="col-lg-3 col-md-4 col-xs-6">
-          <a href="#" class="d-block mb-4 h-100">
-            <img class="img-fluid img-thumbnail" src="http://placehold.it/400x300" alt="">
-          </a>
-          <div class="bottom-left"><small>Saltanat Magjanova</small></div>
-        </div>
-        <div class="col-lg-3 col-md-4 col-xs-6">
-          <a href="#" class="d-block mb-4 h-100">
-            <img class="img-fluid img-thumbnail" src="http://placehold.it/400x300" alt="">
-          </a>
-        </div>
-        <div class="col-lg-3 col-md-4 col-xs-6">
-          <a href="#" class="d-block mb-4 h-100">
-            <img class="img-fluid img-thumbnail" src="http://placehold.it/400x300" alt="">
-          </a>
-        </div>
-        <div class="col-lg-3 col-md-4 col-xs-6">
-          <a href="#" class="d-block mb-4 h-100">
-            <img class="img-fluid img-thumbnail" src="http://placehold.it/400x300" alt="">
-          </a>
-        </div>
-        <div class="col-lg-3 col-md-4 col-xs-6">
-          <a href="#" class="d-block mb-4 h-100">
-            <img class="img-fluid img-thumbnail" src="http://placehold.it/400x300" alt="">
-          </a>
-        </div>
-        <div class="col-lg-3 col-md-4 col-xs-6">
-          <a href="#" class="d-block mb-4 h-100">
-            <img class="img-fluid img-thumbnail" src="http://placehold.it/400x300" alt="">
-          </a>
-        </div>
-        <div class="col-lg-3 col-md-4 col-xs-6">
-          <a href="#" class="d-block mb-4 h-100">
-            <img class="img-fluid img-thumbnail" src="http://placehold.it/400x300" alt="">
-          </a>
-        </div>
-        <div class="col-lg-3 col-md-4 col-xs-6">
-          <a href="#" class="d-block mb-4 h-100">
-            <img class="img-fluid img-thumbnail" src="http://placehold.it/400x300" alt="">
-          </a>
-        </div>
-        <div class="col-lg-3 col-md-4 col-xs-6">
-          <a href="#" class="d-block mb-4 h-100">
-            <img class="img-fluid img-thumbnail" src="http://placehold.it/400x300" alt="">
-          </a>
-        </div>
-        <div class="col-lg-3 col-md-4 col-xs-6">
-          <a href="#" class="d-block mb-4 h-100">
-            <img class="img-fluid img-thumbnail" src="http://placehold.it/400x300" alt="">
-          </a>
-        </div>
-        <div class="col-lg-3 col-md-4 col-xs-6">
-          <a href="#" class="d-block mb-4 h-100">
-            <img class="img-fluid img-thumbnail" src="http://placehold.it/400x300" alt="">
-          </a>
+        <div class="col-lg-3 col-md-3 col-xs-6">
+          <div class="container">
+            <h3 class="my-4 text-center text-lg-left">Suspicious:</h3>
+            <div class="row" >
+              {% for susp in suspicious: %}
+              <div class="col-lg-12 col-md-4 col-xs-6">
+                  <img style='width: 100%; border: 2px solid red;' class="img-fluid img-thumbnail" src="{{url_for('static', filename='images/suspicious/'+susp.id|string+'.'+susp.image)}}" alt="">
+                  <div class="bottom-left"><small><time class="timeago" datetime="{{susp.time}}">5 months ago</time></small></div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
         </div>
       </div>
-
     </div>
     <!-- /.container -->
 
@@ -116,6 +79,7 @@
     <!-- Bootstrap core JavaScript -->
     <script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/timeago.js') }}"></script>
   </body>
 
 </html>
