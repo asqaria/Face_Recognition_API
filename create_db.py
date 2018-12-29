@@ -34,6 +34,15 @@ class Visitors(Base):
     user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship(Users)
 
+    @property
+    def serialize(self):
+        return {
+            'id': self.id,
+            'time': self.time,
+            'user_id': self.user_id,
+            'user': self.user
+        }
+
 
 class Suspicious(Base):
     __tablename__ = "suspicious"
@@ -41,6 +50,15 @@ class Suspicious(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     time = Column(DateTime, default=func.now())
     image = Column(String(250), nullable=False)
+
+    @property
+    def serialize(self):
+        return {
+            'id': self.id,
+            'time': self.time,
+            'image': self.image
+        }
+
 
 engine = create_engine('sqlite:///database.db')
 Base.metadata.create_all(engine)
