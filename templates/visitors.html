@@ -38,7 +38,7 @@
 
       <div class="row text-center text-lg-left">
         {% for visitor in visitors: %}
-        <div class="col-lg-3 col-md-4 col-xs-6">
+        <div style='cursor: pointer;' data-toggle="modal" data-target="#user{{visitor.user_id}}" class="col-lg-3 col-md-4 col-xs-6">
             <img style='width: 100%; border: 1px solid black;' class="img-fluid img-thumbnail" src="{{url_for('static', filename='images/users/'+visitor.user.id|string+'/picture.'+visitor.user.image)}}" alt="">
             <div class="bottom-left"><small>{{ visitor.user.name }}, <time class="timeago" datetime="{{visitor.time}}">5 months ago</time></small></div>
         </div>
@@ -47,6 +47,47 @@
 
     </div>
     <!-- /.container -->
+
+    <!-- Open user details -->
+    {% for visitor in visitors: %}
+    <div class="modal fade" id="user{{visitor.user_id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">User profle</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <table style="width: 100%">
+              <tr>
+                <td>
+                  <img width='245px' src="{{url_for('static', filename='images/users/'+visitor.user.id|string+'/picture.'+visitor.user.image)}}">
+                </td>
+                <td style='padding-left: 10px'>
+                    <label style="margin-bottom: 0px;" for="name" class="bmd-label-floating"><small>Name:</small></label>
+                    <input style="width: 100%;" type="text" class="form-control" id="name" name="name" placeholder="{{visitor.user.name}}" value="{{visitor.user.name}}">
+
+                    <label style="margin-bottom: 0px;" for="email" class="bmd-label-floating"><small>Email:</small></label>
+                    <input style="width: 100%;" type="text" class="form-control" id="email" name="email" placeholder="{{visitor.user.email}}" value="{{visitor.user.email}}">
+
+                    <label style="margin-bottom: 0px;" for="phone" class="bmd-label-floating"><small>Phone:</small></label>
+                    <input style="width: 100%;" type="text" class="form-control" id="phone" name="phone" placeholder="{{visitor.user.phone}}" value="{{visitor.user.phone}}">
+
+                </td>
+              </tr>
+            </table>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
 
     <!-- Modal -->
     {% include 'registration.html' %}
