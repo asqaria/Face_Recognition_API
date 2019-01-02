@@ -14,7 +14,6 @@ import pickle
 import sys
 import os
 import pandas as pd
-import time as tm
 
 engine = create_engine("sqlite:///database.db")
 Base.metadata.bind = engine
@@ -42,6 +41,15 @@ TRESHOLD = 0.85
 # Deep network installation
 modeldir = 'features/nn4.small2.v1.t7'
 net = openface.TorchNeuralNet(model=modeldir, imgDim=96, cuda=False)
+
+
+# Upload classifier
+classifier = 'features/classifier.pkl'
+with open(classifier, 'rb') as f:
+    if sys.version_info[0] < 3:
+        (le, clf) = pickle.load(f)
+    else:
+        (le, clf) = pickle.load(f, encoding='latin1')
 
 
 def allowed_file(filename):
@@ -96,18 +104,17 @@ def train(dir, workdir):
     with open(fname, 'w') as f:
         pickle.dump((le, clf), f)
 
-
-@app.route('/recognize/', methods=['POST'])
-def recognize():
-    images = request.files.getlist('images')
-    total_faces, matrices = get_rep(images)
-    classifier = 'features/classifier.pkl'
-
     with open(classifier, 'rb') as f:
         if sys.version_info[0] < 3:
             (le, clf) = pickle.load(f)
         else:
             (le, clf) = pickle.load(f, encoding='latin1')
+
+
+@app.route('/recognize/', methods=['POST'])
+def recognize():
+    images = request.files.getlist('images')
+    total_faces, matrices = get_rep(images)
 
     labels = list()
     names = list()
