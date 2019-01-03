@@ -53,6 +53,7 @@
     <div class="modal fade" id="user{{visitor.user_id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
+          <form method='POST' action='/modify/'>
           <div class="modal-header">
             <h5 class="modal-title" id="exampleModalLongTitle">User profle</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -66,6 +67,8 @@
                   <img width='245px' src="{{url_for('static', filename='images/users/'+visitor.user.id|string+'/picture.'+visitor.user.image)}}">
                 </td>
                 <td style='padding-left: 10px'>
+                    <input type="hidden" name="id" value="{{visitor.user_id}}">
+
                     <label style="margin-bottom: 0px;" for="name" class="bmd-label-floating"><small>Name:</small></label>
                     <input style="width: 100%;" type="text" class="form-control" id="name" name="name" placeholder="{{visitor.user.name}}" value="{{visitor.user.name}}">
 
@@ -74,7 +77,6 @@
 
                     <label style="margin-bottom: 0px;" for="phone" class="bmd-label-floating"><small>Phone:</small></label>
                     <input style="width: 100%;" type="text" class="form-control" id="phone" name="phone" placeholder="{{visitor.user.phone}}" value="{{visitor.user.phone}}">
-
                 </td>
               </tr>
             </table>
@@ -82,8 +84,10 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button name='submit' value="Update" type="submit" class="btn btn-primary">Update</button>
+            <button name='submit' value="Delete" type="submit" class="btn btn-danger">Delete</button>
           </div>
+        </form>
         </div>
       </div>
     </div>

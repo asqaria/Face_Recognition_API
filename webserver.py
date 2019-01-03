@@ -218,14 +218,37 @@ def insert():
     return jsonify(result)
 
 
-@app.route('/update/', methods=['POST'])
-def update():
-    pass
+@app.route('/modify/', methods=['POST'])
+def modify():
+    if request.form['submit'] == 'Update':
+        id = request.form['id']
+        name = request.form['name']
+        email = request.form['email']
+        phone = request.form['phone']
 
+        user = session.query(Users).filter_by(id=id).one()
+        user.name = name
+        user.email = email
+        user.phone = phone
+        session.commit()
+    elif request.form['submit'] == 'Delete':
+        id = request.form['id']
+        session.query(Users).filter_by(id=id).delete()
+        session.query(Visitors).filter_by(user_id=id).delete()
+        session.commit()
 
-@app.route('/delete/', methods=['POST'])
-def delete():
-    pass
+        path = 'static/images/users/%s' % id
+        for root, dirs, files in os.walk(path, topdown=False):
+            for name in files:
+                os.remove(os.path.join(root, name))
+            for name in dirs:
+                os.rmdir(os.path.join(root, name))
+        os.rmdir(path)
+
+        # update classifier.pkl
+        train(dir='static/images/users', workdir='features')
+
+    return redirect(url_for('main'))
 
 
 @app.route('/', methods=['GET'])
