@@ -37,14 +37,14 @@ class FaceRecgnitionApp:
         # User info
         self.user_info = tki.Frame(self.root, padx=10, pady=150, height=500, width=500)
 
-        name = tki.Label(self.user_info, pady=50, text="YOUR NAME HERE", font=("Helvetica", 26))
-        name.pack(side='bottom')
+        self.name = tki.Label(self.user_info, pady=50, text="YOUR NAME HERE", font=("Helvetica", 26))
+        self.name.pack(side='bottom')
 
-        picture = tki.Canvas(self.user_info, width=400, height=300)
-        picture.pack(side='top')
+        self.picture = tki.Canvas(self.user_info, width=400, height=300)
+        self.picture.pack(side='top')
 
-        self.img = ImageTk.PhotoImage(Image.open("default.png"))
-        picture.create_image(20, 20, anchor=tki.NW, image=self.img)
+        self.img = ImageTk.PhotoImage(Image.open("default.png").resize((400, 300), Image.ANTIALIAS))
+        self.img_on_canvas = self.picture.create_image(20, 20, anchor=tki.NW, image=self.img)
 
         self.user_info.pack(side="right", fill="both", expand=True)
 
@@ -85,7 +85,11 @@ class FaceRecgnitionApp:
                             mixer.music.load("2.wav")
                         else:
                             print("Welcome %s (%.2f)" % (j['name'], j['confidence']))
+                            self.name.config(text=j['name'])
                             self.ser.write(b'0')
+                            new_img_path = '../static/images/users/%s/picture.jpg' % j['id']
+                            new_img = ImageTk.PhotoImage(Image.open(new_img_path).resize((400, 300), Image.ANTIALIAS))
+                            self.picture.itemconfig(self.img_on_canvas, image=new_img)
                             mixer.music.load("1.wav")
                         mixer.music.play()
 
@@ -96,6 +100,8 @@ class FaceRecgnitionApp:
 
                 if self.ctn_i > 50:
                     self.ctn = True
+                    self.name.config(text="YOUR NAME HERE")
+                    self.picture.itemconfig(self.img_on_canvas, image=self.img)
                 else:
                     self.ctn_i += 1
 
@@ -128,12 +134,12 @@ class FaceRecgnitionApp:
         self.stream.stop()
         self.root.quit()
 
-    def toggle_fullscreen(self):
+    def toggle_fullscreen(self, event=None):
         self.state = not self.state  # Just toggling the boolean
         self.root.attributes("-fullscreen", self.state)
         return "break"
 
-    def end_fullscreen(self):
+    def end_fullscreen(self, event=None):
         self.state = False
         self.root.attributes("-fullscreen", False)
         return "break"
