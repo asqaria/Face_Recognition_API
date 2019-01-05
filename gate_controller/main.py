@@ -53,7 +53,7 @@ while True:
                 print("Not recognized")
                 mixer.music.load("2.wav")
             else:
-                print("Welcome %s" % j['name'])
+                print("Welcome %s (%.2f)" % (j['name'], j['confidence']))
                 ser.write(b'0')
                 mixer.music.load("1.wav")
             mixer.music.play()

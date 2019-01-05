@@ -36,7 +36,7 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg'])
 MIN_IMG = 2
 
 # Minimum confidence
-TRESHOLD = 0.85
+TRESHOLD = 0.90
 
 # Deep network installation
 modeldir = 'features/nn4.small2.v1.t7'

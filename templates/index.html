@@ -67,6 +67,9 @@
     </div>
     <!-- /.container -->
 
+    <!-- Modal -->
+    {% include 'registration.html' %}
+
     <!-- Open user details -->
     {% for visitor in visitors: %}
     <div class="modal fade" id="user{{visitor.user_id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
@@ -111,9 +114,6 @@
       </div>
     </div>
     {% endfor %}
-
-    <!-- Modal -->
-    {% include 'registration.html' %}
 
     <!-- Footer -->
     {% include 'footer.html' %}
