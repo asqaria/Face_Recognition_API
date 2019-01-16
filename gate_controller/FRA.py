@@ -27,7 +27,10 @@ class FaceRecgnitionApp:
         # init
         self.ctn = True
         self.ctn_i = 0
-        self.ser = serial.Serial('/dev/ttyACM0')
+        self.face_list = list()
+        self.fc_ctn = False
+        self.fc_ctn_i = 0
+        # self.ser = serial.Serial('/dev/ttyACM0')
         self.ampl = 0
 
         self.state = False
@@ -73,32 +76,48 @@ class FaceRecgnitionApp:
                         print('Far distance: %s' % self.ampl)
                         continue
                     elif self.ctn:
-                        print('Scanning')
-                        imgname = "frame.jpg"
-                        cv2.imwrite(imgname, self.frame)
-                        images = {'images': open(imgname, 'rb')}
-                        r = requests.post('http://localhost:3434/recognize/', files=images)
+                        if self.fc_ctn:
+                            print('Scanning')
+                            images = {}
+                            print(len(self.face_list))
+                            i = 0
+                            for img in self.face_list:
+                                imgname = "frame%s.jpg" % i
+                                cv2.imwrite(imgname, self.frame)
+                                images.update({'images': open(imgname, 'rb')})
+                                i+=1
 
-                        j = r.json()
-                        if j['id'] == 'Null':
-                            print("Not recognized")
-                            mixer.music.load("2.wav")
+                            r = requests.post('http://localhost:3434/recognize/', files=images)
+                            j = r.json()
+                            if j['id'] == 'Null':
+                                print("Not recognized")
+                                mixer.music.load("2.wav")
+                            else:
+                                print("Welcome %s (%.2f)" % (j['name'], j['confidence']))
+                                self.name.config(text=j['name'])
+                                # self.ser.write(b'0')
+                                new_img_path = '../static/images/users/%s/picture.jpg' % j['id']
+                                new_img = ImageTk.PhotoImage(Image.open(new_img_path).resize((400, 300), Image.ANTIALIAS))
+                                self.picture.itemconfig(self.img_on_canvas, image=new_img)
+                                mixer.music.load("1.wav")
+                                self.ctn = False
+                                self.ctn_i = 0
+                            mixer.music.play()
+                            self.face_list = list()
+                            self.fc_ctn = False
+                            self.fc_ctn_i = 0
                         else:
-                            print("Welcome %s (%.2f)" % (j['name'], j['confidence']))
-                            self.name.config(text=j['name'])
-                            self.ser.write(b'0')
-                            new_img_path = '../static/images/users/%s/picture.jpg' % j['id']
-                            new_img = ImageTk.PhotoImage(Image.open(new_img_path).resize((400, 300), Image.ANTIALIAS))
-                            self.picture.itemconfig(self.img_on_canvas, image=new_img)
-                            mixer.music.load("1.wav")
-                        mixer.music.play()
+                            self.face_list.append(self.frame)
 
-                        self.ctn = False
-                        self.ctn_i = 0
+
+                        if self.fc_ctn_i > 5:
+                            self.fc_ctn = True
+                        else:
+                            self.fc_ctn_i += 1
 
                     cv2.rectangle(self.frame, (left, top), (right, bottom), (255, 0, 0), 1)
 
-                if self.ctn_i > 50:
+                if self.ctn_i > 30:
                     self.ctn = True
                     self.name.config(text="YOUR NAME HERE")
                     self.picture.itemconfig(self.img_on_canvas, image=self.img)

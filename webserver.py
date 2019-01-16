@@ -46,10 +46,7 @@ net = openface.TorchNeuralNet(model=modeldir, imgDim=96, cuda=False)
 # Upload classifier
 classifier = 'features/classifier.pkl'
 with open(classifier, 'rb') as f:
-    if sys.version_info[0] < 3:
-        (le, clf) = pickle.load(f)
-    else:
-        (le, clf) = pickle.load(f, encoding='latin1')
+    (le, clf) = pickle.load(f)
 
 
 def allowed_file(filename):
@@ -105,10 +102,7 @@ def train(dir, workdir):
         pickle.dump((le, clf), f)
 
     with open(classifier, 'rb') as f:
-        if sys.version_info[0] < 3:
-            (le, clf) = pickle.load(f)
-        else:
-            (le, clf) = pickle.load(f, encoding='latin1')
+        (le, clf) = pickle.load(f)
 
 
 @app.route('/recognize/', methods=['POST'])
