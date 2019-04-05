@@ -30,7 +30,7 @@ class FaceRecgnitionApp:
         self.face_list = list()
         self.fc_ctn = False
         self.fc_ctn_i = 0
-        # self.ser = serial.Serial('/dev/ttyACM0')
+        self.ser = serial.Serial('/dev/ttyACM0')
         self.ampl = 0
 
         self.state = False
@@ -83,7 +83,7 @@ class FaceRecgnitionApp:
                             i = 0
                             for img in self.face_list:
                                 imgname = "frame%s.jpg" % i
-                                cv2.imwrite(imgname, self.frame)
+                                cv2.imwrite(imgname, img)
                                 images.update({'images': open(imgname, 'rb')})
                                 i+=1
 
@@ -95,7 +95,7 @@ class FaceRecgnitionApp:
                             else:
                                 print("Welcome %s (%.2f)" % (j['name'], j['confidence']))
                                 self.name.config(text=j['name'])
-                                # self.ser.write(b'0')
+                                self.ser.write(b'0')
                                 new_img_path = '../static/images/users/%s/picture.jpg' % j['id']
                                 new_img = ImageTk.PhotoImage(Image.open(new_img_path).resize((400, 300), Image.ANTIALIAS))
                                 self.picture.itemconfig(self.img_on_canvas, image=new_img)
@@ -110,12 +110,12 @@ class FaceRecgnitionApp:
                             self.face_list.append(self.frame)
 
 
-                        if self.fc_ctn_i > 5:
+                        if self.fc_ctn_i > 15:
                             self.fc_ctn = True
                         else:
                             self.fc_ctn_i += 1
 
-                    cv2.rectangle(self.frame, (left, top), (right, bottom), (255, 0, 0), 1)
+                    #cv2.rectangle(self.frame, (left, top), (right, bottom), (255, 0, 0), 1)
 
                 if self.ctn_i > 30:
                     self.ctn = True

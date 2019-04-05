@@ -107,6 +107,10 @@ def train(dir, workdir):
 
 @app.route('/recognize/', methods=['POST'])
 def recognize():
+    # Upload classifier
+    with open(classifier, 'rb') as f:
+        (le, clf) = pickle.load(f)
+
     images = request.files.getlist('images')
     total_faces, matrices = get_rep(images)
 
